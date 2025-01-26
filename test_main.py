@@ -4,6 +4,7 @@ import sys
 import os
 import subprocess
 import json
+import requests
 from main import download_extension, main
 
 class TestExtensionManager(unittest.TestCase):
@@ -83,19 +84,26 @@ class TestExtensionManager(unittest.TestCase):
         self.assertEqual(mock_get.call_args[0][0], expected_download_url)
 
     @patch("os.path.exists")
-    def test_download_extension_cached(self, mock_exists):
+    @patch("requests.post")
+    def test_download_extension_cached(self, mock_post, mock_exists):
+        # Mock the API query response for version check
+        mock_post_response = MagicMock()
+        mock_post_response.json.return_value = {
+            "results": [{"extensions": [{"versions": [{"version": "1.0.0"}]}]}]
+        }
+        mock_post.return_value = mock_post_response
+
         # Mock that the file already exists
         mock_exists.return_value = True
 
         extension_id = "publisher.extension"
         expected_path = "./extensions/publisher.extension-1.0.0.vsix"
 
-        # Should return the cached path without making any requests
-        with patch("requests.post") as mock_post, patch("requests.get") as mock_get:
+        # Should return the cached path without making any download requests
+        with patch("requests.get") as mock_get:
             result = download_extension(extension_id)
+            mock_get.assert_not_called()
 
-        mock_post.assert_not_called()
-        mock_get.assert_not_called()
         self.assertEqual(result, expected_path)
 
     @patch("requests.post")
