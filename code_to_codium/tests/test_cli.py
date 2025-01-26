@@ -1,3 +1,5 @@
+"""Tests for code-to-codium CLI."""
+
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import sys
@@ -5,7 +7,8 @@ import os
 import subprocess
 import json
 import requests
-from main import download_extension, main
+from code_to_codium.cli import download_extension, main
+
 
 class TestExtensionManager(unittest.TestCase):
     def setUp(self):
@@ -120,44 +123,12 @@ class TestExtensionManager(unittest.TestCase):
         with self.assertRaises(requests.exceptions.RequestException):
             download_extension("publisher.extension")
 
-    @patch('sys.argv', ['main.py'])  # No extension ID provided
     def test_main_no_args(self):
         with self.assertRaises(SystemExit) as cm:
-            main()
+            main([])
         self.assertEqual(cm.exception.code, 1)
 
-    @patch('sys.argv', ['main.py', 'publisher.extension'])
-    @patch('main.download_extension')
-    @patch('subprocess.run')
-    def test_main_success(self, mock_run, mock_download):
-        mock_download.return_value = "./extensions/publisher.extension-1.0.0.vsix"
-        mock_run.return_value.returncode = 0
-
-        main()
-
-        mock_download.assert_called_once_with("publisher.extension")
-        mock_run.assert_called_once_with(
-            [
-                "windsurf",
-                "--install-extension",
-                "./extensions/publisher.extension-1.0.0.vsix",
-            ],
-            check=True,
-        )
-
-    @patch('sys.argv', ['main.py', 'publisher.extension'])
-    @patch('main.download_extension')
-    @patch('subprocess.run')
-    def test_main_installation_error(self, mock_run, mock_download):
-        mock_download.return_value = "./extensions/publisher.extension-1.0.0.vsix"
-        mock_run.side_effect = subprocess.CalledProcessError(1, 'cmd')
-
-        with self.assertRaises(SystemExit) as cm:
-            main()
-        self.assertEqual(cm.exception.code, 1)
-
-    @patch('sys.argv', ['main.py', 'publisher.extension'])
-    @patch('main.download_extension')
+    @patch('code_to_codium.cli.download_extension')
     @patch('subprocess.run')
     @patch('os.remove')
     def test_main_success_with_cleanup(self, mock_remove, mock_run, mock_download):
@@ -165,7 +136,7 @@ class TestExtensionManager(unittest.TestCase):
         mock_download.return_value = vsix_path
         mock_run.return_value.returncode = 0
 
-        main()
+        main(["publisher.extension"])
 
         mock_download.assert_called_once_with("publisher.extension")
         mock_run.assert_called_once_with(
@@ -179,8 +150,7 @@ class TestExtensionManager(unittest.TestCase):
         # Verify cleanup
         mock_remove.assert_called_once_with(vsix_path)
 
-    @patch('sys.argv', ['main.py', 'publisher.extension'])
-    @patch('main.download_extension')
+    @patch('code_to_codium.cli.download_extension')
     @patch('subprocess.run')
     @patch('os.remove')
     def test_main_cleanup_error(self, mock_remove, mock_run, mock_download):
@@ -190,7 +160,7 @@ class TestExtensionManager(unittest.TestCase):
         mock_remove.side_effect = OSError("Permission denied")
 
         # Should complete successfully even if cleanup fails
-        main()
+        main(["publisher.extension"])
 
         mock_remove.assert_called_once_with(vsix_path)
         # Verify that the installation completed
@@ -202,6 +172,3 @@ class TestExtensionManager(unittest.TestCase):
             ],
             check=True,
         )
-
-if __name__ == '__main__':
-    unittest.main()

@@ -1,22 +1,28 @@
-#!/usr/bin/env python3
+"""Command-line interface for code-to-codium."""
+
 import sys
 import subprocess
 import requests
 import os
 import json
+from typing import Optional
 
 
-def download_extension(extension_id, specific_version=None, no_cache=False):
+def download_extension(extension_id: str, specific_version: Optional[str] = None, no_cache: bool = False) -> str:
     """
     Download a VS Code extension from the marketplace.
 
     Args:
-        extension_id (str): The extension ID in format 'publisher.extension'
-        specific_version (str, optional): Specific version to download. Defaults to None (latest).
-        no_cache (bool, optional): Force re-download even if file exists. Defaults to False.
+        extension_id: The extension ID in format 'publisher.extension'
+        specific_version: Specific version to download. Defaults to None (latest).
+        no_cache: Force re-download even if file exists. Defaults to False.
 
     Returns:
         str: Path to the downloaded .vsix file
+
+    Raises:
+        SystemExit: If the extension ID is invalid
+        requests.exceptions.RequestException: If there's an error downloading the extension
     """
     try:
         publisher, extension_name = extension_id.split(".", 1)
@@ -45,9 +51,7 @@ def download_extension(extension_id, specific_version=None, no_cache=False):
         if specific_version:
             version = specific_version
         else:
-            version = extension_data["results"][0]["extensions"][0]["versions"][0][
-                "version"
-            ]
+            version = extension_data["results"][0]["extensions"][0]["versions"][0]["version"]
     except (KeyError, IndexError) as e:
         print(f"Failed to get extension metadata: {e}")
         sys.exit(1)
@@ -79,14 +83,22 @@ def download_extension(extension_id, specific_version=None, no_cache=False):
     return file_path
 
 
-def main():
-    # Get the extension ID from command line argument
-    if len(sys.argv) != 2:
+def main(args: Optional[list[str]] = None) -> None:
+    """
+    Main entry point for the CLI.
+
+    Args:
+        args: Command line arguments (defaults to sys.argv[1:])
+    """
+    if args is None:
+        args = sys.argv[1:]
+
+    if not args:
         print("Please provide the extension ID as an argument")
-        print("Example: ./main.py publisher.extension-name")
+        print("Example: code-to-codium publisher.extension-name")
         sys.exit(1)
 
-    extension_id = sys.argv[1]
+    extension_id = args[0]
 
     try:
         # Download the .vsix file
@@ -112,6 +124,7 @@ def main():
     except subprocess.CalledProcessError as e:
         print(f"Failed to install extension: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

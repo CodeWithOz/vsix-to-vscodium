@@ -1,0 +1,23 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "code-to-codium"
+authors = [{name = "Uche Ozoemena", email = "codewithoz@outlook.com"}]
+dynamic = ["version", "description"]
+dependencies = [
+    "requests>=2.32.3",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+]
+
+[project.urls]
+Home = "https://github.com/CodeWithOz/code-to-codium"
+
+[project.scripts]
+code-to-codium = "code_to_codium.cli:main"
