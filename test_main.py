@@ -156,5 +156,52 @@ class TestExtensionManager(unittest.TestCase):
             main()
         self.assertEqual(cm.exception.code, 1)
 
+    @patch('sys.argv', ['main.py', 'publisher.extension'])
+    @patch('main.download_extension')
+    @patch('subprocess.run')
+    @patch('os.remove')
+    def test_main_success_with_cleanup(self, mock_remove, mock_run, mock_download):
+        vsix_path = "./extensions/publisher.extension-1.0.0.vsix"
+        mock_download.return_value = vsix_path
+        mock_run.return_value.returncode = 0
+
+        main()
+
+        mock_download.assert_called_once_with("publisher.extension")
+        mock_run.assert_called_once_with(
+            [
+                "windsurf",
+                "--install-extension",
+                vsix_path,
+            ],
+            check=True,
+        )
+        # Verify cleanup
+        mock_remove.assert_called_once_with(vsix_path)
+
+    @patch('sys.argv', ['main.py', 'publisher.extension'])
+    @patch('main.download_extension')
+    @patch('subprocess.run')
+    @patch('os.remove')
+    def test_main_cleanup_error(self, mock_remove, mock_run, mock_download):
+        vsix_path = "./extensions/publisher.extension-1.0.0.vsix"
+        mock_download.return_value = vsix_path
+        mock_run.return_value.returncode = 0
+        mock_remove.side_effect = OSError("Permission denied")
+
+        # Should complete successfully even if cleanup fails
+        main()
+
+        mock_remove.assert_called_once_with(vsix_path)
+        # Verify that the installation completed
+        mock_run.assert_called_once_with(
+            [
+                "windsurf",
+                "--install-extension",
+                vsix_path,
+            ],
+            check=True,
+        )
+
 if __name__ == '__main__':
     unittest.main()
