@@ -85,20 +85,27 @@ def main():
         print("Please provide the extension ID as an argument")
         print("Example: ./main.py publisher.extension-name")
         sys.exit(1)
-    
+
     extension_id = sys.argv[1]
-    
+
     try:
         # Download the .vsix file
         print(f"Downloading extension: {extension_id}")
         vsix_path = download_extension(extension_id)
         print(f"Downloaded to: {vsix_path}")
-        
+
         # Install the extension in VS Codium
         print("Installing extension...")
         subprocess.run(['windsurf', '--install-extension', vsix_path], check=True)
         print("Extension installed successfully!")
-        
+
+        # Clean up the .vsix file
+        try:
+            os.remove(vsix_path)
+            print(f"Cleaned up {vsix_path}")
+        except OSError as e:
+            print(f"Warning: Could not remove {vsix_path}: {e}")
+
     except requests.exceptions.RequestException as e:
         print(f"Failed to download extension: {e}")
         sys.exit(1)
