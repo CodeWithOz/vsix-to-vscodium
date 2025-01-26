@@ -1,4 +1,4 @@
-"""Tests for code-to-codium CLI."""
+"""Tests for vsix-to-codium CLI."""
 
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
@@ -7,7 +7,7 @@ import os
 import subprocess
 import json
 import requests
-from code_to_codium.cli import download_extension, main
+from vsix_to_codium.cli import download_extension, main
 
 
 class TestExtensionManager(unittest.TestCase):
@@ -128,7 +128,7 @@ class TestExtensionManager(unittest.TestCase):
             main([])
         self.assertEqual(cm.exception.code, 1)
 
-    @patch('code_to_codium.cli.download_extension')
+    @patch('vsix_to_codium.cli.download_extension')
     @patch('subprocess.run')
     @patch('os.remove')
     def test_main_success_with_cleanup(self, mock_remove, mock_run, mock_download):
@@ -150,7 +150,7 @@ class TestExtensionManager(unittest.TestCase):
         # Verify cleanup
         mock_remove.assert_called_once_with(vsix_path)
 
-    @patch('code_to_codium.cli.download_extension')
+    @patch('vsix_to_codium.cli.download_extension')
     @patch('subprocess.run')
     @patch('os.remove')
     def test_main_cleanup_error(self, mock_remove, mock_run, mock_download):

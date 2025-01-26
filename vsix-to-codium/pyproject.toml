@@ -3,7 +3,7 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "code-to-codium"
+name = "vsix-to-codium"
 authors = [{name = "Uche Ozoemena", email = "codewithoz@outlook.com"}]
 dynamic = ["version", "description"]
 dependencies = [
@@ -17,7 +17,7 @@ test = [
 ]
 
 [project.urls]
-Home = "https://github.com/CodeWithOz/code-to-codium"
+Home = "https://github.com/CodeWithOz/vsix-to-codium"
 
 [project.scripts]
-code-to-codium = "code_to_codium.cli:main"
+vsix-to-codium = "vsix_to_codium.cli:main"

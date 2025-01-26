@@ -1,21 +1,21 @@
-# code-to-codium
+# vsix-to-codium
 
 A tool to download and install VS Code extensions in Codium-based browsers eg Windsurf and Cursor.
 
 ## Installation
 
 ```bash
-pip install code-to-codium
+pip install vsix-to-codium
 ```
 
 ## Usage
 
 ```bash
 # Install an extension
-code-to-codium publisher.extension-name
+vsix-to-codium publisher.extension-name
 
 # Example: Install Python extension
-code-to-codium ms-python.python
+vsix-to-codium ms-python.python
 ```
 
 ## Features
@@ -32,8 +32,8 @@ To set up the development environment:
 
 ```bash
 # Clone the repository
-git clone https://github.com/CodeWithOz/code-to-codium.git
-cd code-to-codium
+git clone https://github.com/yourusername/vsix-to-codium.git
+cd vsix-to-codium
 
 # Create and activate a virtual environment
 python -m venv .venv

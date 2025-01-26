@@ -1,4 +1,4 @@
-"""Command-line interface for code-to-codium."""
+"""Command-line interface for vsix-to-codium."""
 
 import sys
 import subprocess
@@ -95,7 +95,7 @@ def main(args: Optional[list[str]] = None) -> None:
 
     if not args:
         print("Please provide the extension ID as an argument")
-        print("Example: code-to-codium publisher.extension-name")
+        print("Example: vsix-to-codium publisher.extension-name")
         sys.exit(1)
 
     extension_id = args[0]
