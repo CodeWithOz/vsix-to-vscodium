@@ -5,7 +5,34 @@ import subprocess
 import requests
 import os
 import json
-from typing import Optional
+import argparse
+from typing import Optional, List
+
+
+def get_vscode_extensions() -> List[str]:
+    """
+    Get a list of installed VS Code extensions.
+
+    Returns:
+        List[str]: List of extension IDs in the format 'publisher.extension'
+
+    Raises:
+        subprocess.CalledProcessError: If code command fails
+        FileNotFoundError: If VS Code is not installed
+    """
+    try:
+        result = subprocess.run(
+            ["code", "--list-extensions"], check=True, capture_output=True, text=True
+        )
+        return result.stdout.strip().split("\n")
+    except subprocess.CalledProcessError as e:
+        print(f"Error getting VS Code extensions: {e}")
+        raise
+    except FileNotFoundError:
+        print(
+            "VS Code command 'code' not found. Is VS Code installed and in your PATH?"
+        )
+        raise
 
 
 def download_extension(extension_id: str, specific_version: Optional[str] = None, no_cache: bool = False) -> str:
@@ -42,7 +69,7 @@ def download_extension(extension_id: str, specific_version: Optional[str] = None
         "User-Agent": "VSCode Extension Manager/1.0",
     }
 
-    print("Querying Marketplace API...")
+    print(f"Querying Marketplace API for {extension_id}...")
     response = requests.post(api_url, headers=headers, json=payload)
     response.raise_for_status()
 
@@ -83,6 +110,29 @@ def download_extension(extension_id: str, specific_version: Optional[str] = None
     return file_path
 
 
+def install_extension(vsix_path: str, ide_name: str) -> None:
+    """
+    Install a .vsix extension in the specified IDE.
+
+    Args:
+        vsix_path: Path to the .vsix file
+        ide_name: Name of the IDE executable (e.g., 'windsurf', 'cursor')
+
+    Raises:
+        subprocess.CalledProcessError: If installation fails
+    """
+    print(f"Installing extension using {ide_name}...")
+    subprocess.run([ide_name, "--install-extension", vsix_path], check=True)
+    print("Extension installed successfully!")
+
+    # Clean up the .vsix file
+    try:
+        os.remove(vsix_path)
+        print(f"Cleaned up {vsix_path}")
+    except OSError as e:
+        print(f"Warning: Could not remove {vsix_path}: {e}")
+
+
 def main(args: Optional[list[str]] = None) -> None:
     """
     Main entry point for the CLI.
@@ -90,40 +140,60 @@ def main(args: Optional[list[str]] = None) -> None:
     Args:
         args: Command line arguments (defaults to sys.argv[1:])
     """
-    if args is None:
-        args = sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        description="Download and install VS Code extensions in Codium-based IDEs"
+    )
+    parser.add_argument(
+        "--ide",
+        default="windsurf",
+        help="Name of the Codium-based IDE executable (default: windsurf)",
+    )
+    parser.add_argument(
+        "--transfer-all",
+        action="store_true",
+        help="Transfer all extensions from VS Code installation",
+    )
+    parser.add_argument(
+        "extension_id",
+        nargs="?",
+        help="Extension ID in format publisher.extension-name",
+    )
 
-    if not args:
-        print("Please provide the extension ID as an argument")
-        print("Example: vsix-to-codium publisher.extension-name")
-        sys.exit(1)
+    args = parser.parse_args(args)
 
-    extension_id = args[0]
-
-    try:
-        # Download the .vsix file
-        print(f"Downloading extension: {extension_id}")
-        vsix_path = download_extension(extension_id)
-        print(f"Downloaded to: {vsix_path}")
-
-        # Install the extension in VS Codium
-        print("Installing extension...")
-        subprocess.run(['windsurf', '--install-extension', vsix_path], check=True)
-        print("Extension installed successfully!")
-
-        # Clean up the .vsix file
+    if args.transfer_all:
         try:
-            os.remove(vsix_path)
-            print(f"Cleaned up {vsix_path}")
-        except OSError as e:
-            print(f"Warning: Could not remove {vsix_path}: {e}")
+            extensions = get_vscode_extensions()
+            print(f"Found {len(extensions)} extensions installed in VS Code")
+            for ext_id in extensions:
+                try:
+                    print(f"\nProcessing {ext_id}...")
+                    vsix_path = download_extension(ext_id)
+                    install_extension(vsix_path, args.ide)
+                except (
+                    requests.exceptions.RequestException,
+                    subprocess.CalledProcessError,
+                ) as e:
+                    print(f"Failed to process {ext_id}: {e}")
+                    print("Continuing with next extension...")
+            print("\nFinished processing all extensions")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            sys.exit(1)
+    else:
+        if not args.extension_id:
+            parser.print_help()
+            print("\nPlease provide an extension ID or use --transfer-all")
+            sys.exit(1)
 
-    except requests.exceptions.RequestException as e:
-        print(f"Failed to download extension: {e}")
-        sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to install extension: {e}")
-        sys.exit(1)
+        try:
+            vsix_path = download_extension(args.extension_id)
+            install_extension(vsix_path, args.ide)
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to download extension: {e}")
+            sys.exit(1)
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to install extension: {e}")
+            sys.exit(1)
 
 
 if __name__ == "__main__":

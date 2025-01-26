@@ -7,7 +7,12 @@ import os
 import subprocess
 import json
 import requests
-from vsix_to_codium.cli import download_extension, main
+from vsix_to_codium.cli import (
+    download_extension,
+    main,
+    get_vscode_extensions,
+    install_extension,
+)
 
 
 class TestExtensionManager(unittest.TestCase):
@@ -123,10 +128,150 @@ class TestExtensionManager(unittest.TestCase):
         with self.assertRaises(requests.exceptions.RequestException):
             download_extension("publisher.extension")
 
-    def test_main_no_args(self):
-        with self.assertRaises(SystemExit) as cm:
-            main([])
-        self.assertEqual(cm.exception.code, 1)
+    def test_get_vscode_extensions_success(self):
+        """Test successful retrieval of VS Code extensions."""
+        mock_output = "publisher1.ext1\npublisher2.ext2\npublisher3.ext3"
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value.stdout = mock_output
+            extensions = get_vscode_extensions()
+
+            self.assertEqual(
+                extensions, ["publisher1.ext1", "publisher2.ext2", "publisher3.ext3"]
+            )
+            mock_run.assert_called_once_with(
+                ["code", "--list-extensions"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+    def test_get_vscode_extensions_not_found(self):
+        """Test when VS Code is not installed."""
+        with patch("subprocess.run", side_effect=FileNotFoundError()):
+            with self.assertRaises(FileNotFoundError):
+                get_vscode_extensions()
+
+    def test_get_vscode_extensions_command_error(self):
+        """Test when VS Code command fails."""
+        with patch(
+            "subprocess.run", side_effect=subprocess.CalledProcessError(1, "code")
+        ):
+            with self.assertRaises(subprocess.CalledProcessError):
+                get_vscode_extensions()
+
+    def test_install_extension_success(self):
+        """Test successful extension installation."""
+        vsix_path = "./extensions/test.vsix"
+        ide_name = "test-ide"
+
+        with patch("subprocess.run") as mock_run, patch("os.remove") as mock_remove:
+            install_extension(vsix_path, ide_name)
+
+            mock_run.assert_called_once_with(
+                ["test-ide", "--install-extension", vsix_path], check=True
+            )
+            mock_remove.assert_called_once_with(vsix_path)
+
+    def test_install_extension_cleanup_error(self):
+        """Test when cleanup fails but installation succeeds."""
+        vsix_path = "./extensions/test.vsix"
+        ide_name = "test-ide"
+
+        with patch("subprocess.run") as mock_run, patch(
+            "os.remove", side_effect=OSError("Permission denied")
+        ):
+            install_extension(vsix_path, ide_name)
+
+            mock_run.assert_called_once()  # Installation should still happen
+            # Function should complete without raising an exception
+
+    def test_install_extension_installation_error(self):
+        """Test when installation fails."""
+        vsix_path = "./extensions/test.vsix"
+        ide_name = "test-ide"
+
+        with patch(
+            "subprocess.run", side_effect=subprocess.CalledProcessError(1, "test-ide")
+        ), patch("os.remove") as mock_remove:
+            with self.assertRaises(subprocess.CalledProcessError):
+                install_extension(vsix_path, ide_name)
+
+            mock_remove.assert_not_called()  # Cleanup shouldn't happen if installation fails
+
+    @patch("vsix_to_codium.cli.get_vscode_extensions")
+    @patch("vsix_to_codium.cli.download_extension")
+    @patch("vsix_to_codium.cli.install_extension")
+    def test_main_transfer_all_success(
+        self, mock_install, mock_download, mock_get_extensions
+    ):
+        """Test successful transfer of all extensions."""
+        mock_get_extensions.return_value = ["pub1.ext1", "pub2.ext2"]
+        mock_download.side_effect = [
+            "./extensions/pub1.ext1.vsix",
+            "./extensions/pub2.ext2.vsix",
+        ]
+
+        main(["--transfer-all"])
+
+        self.assertEqual(mock_get_extensions.call_count, 1)
+        self.assertEqual(mock_download.call_count, 2)
+        self.assertEqual(mock_install.call_count, 2)
+
+        # Verify calls were made with correct arguments
+        mock_download.assert_any_call("pub1.ext1")
+        mock_download.assert_any_call("pub2.ext2")
+        mock_install.assert_any_call("./extensions/pub1.ext1.vsix", "windsurf")
+        mock_install.assert_any_call("./extensions/pub2.ext2.vsix", "windsurf")
+
+    @patch("vsix_to_codium.cli.get_vscode_extensions")
+    @patch("vsix_to_codium.cli.download_extension")
+    @patch("vsix_to_codium.cli.install_extension")
+    def test_main_transfer_all_custom_ide(
+        self, mock_install, mock_download, mock_get_extensions
+    ):
+        """Test transfer all with custom IDE."""
+        mock_get_extensions.return_value = ["pub1.ext1"]
+        mock_download.return_value = "./extensions/pub1.ext1.vsix"
+
+        main(["--transfer-all", "--ide", "cursor"])
+
+        mock_install.assert_called_once_with("./extensions/pub1.ext1.vsix", "cursor")
+
+    @patch("vsix_to_codium.cli.get_vscode_extensions")
+    @patch("vsix_to_codium.cli.download_extension")
+    @patch("vsix_to_codium.cli.install_extension")
+    def test_main_transfer_all_partial_failure(
+        self, mock_install, mock_download, mock_get_extensions
+    ):
+        """Test when some extensions fail to transfer."""
+        mock_get_extensions.return_value = ["pub1.ext1", "pub2.ext2"]
+        mock_download.side_effect = [
+            "./extensions/pub1.ext1.vsix",
+            requests.exceptions.RequestException("API Error"),
+        ]
+
+        main(["--transfer-all"])
+
+        # Should still try to install the successful download
+        mock_install.assert_called_once_with("./extensions/pub1.ext1.vsix", "windsurf")
+
+    def test_main_single_extension_custom_ide(self):
+        """Test installing single extension with custom IDE."""
+        with patch("vsix_to_codium.cli.download_extension") as mock_download, patch(
+            "vsix_to_codium.cli.install_extension"
+        ) as mock_install:
+            mock_download.return_value = "./extensions/test.vsix"
+
+            main(["--ide", "cursor", "publisher.extension"])
+
+            mock_download.assert_called_once_with("publisher.extension")
+            mock_install.assert_called_once_with("./extensions/test.vsix", "cursor")
+
+    def test_main_no_args_shows_help(self):
+        """Test that running without args shows help."""
+        with patch("sys.stdout"), patch("sys.stderr"):
+            with self.assertRaises(SystemExit):
+                main([])
 
     @patch('vsix_to_codium.cli.download_extension')
     @patch('subprocess.run')
@@ -172,3 +317,18 @@ class TestExtensionManager(unittest.TestCase):
             ],
             check=True,
         )
+
+    @patch("vsix_to_codium.cli.download_extension")
+    @patch("subprocess.run")
+    @patch("os.remove")
+    def test_main_installation_error(self, mock_remove, mock_run, mock_download):
+        """Test that installation errors are handled correctly."""
+        vsix_path = "./extensions/publisher.extension-1.0.0.vsix"
+        mock_download.return_value = vsix_path
+        mock_run.side_effect = subprocess.CalledProcessError(1, "windsurf")
+
+        with self.assertRaises(SystemExit) as cm:
+            main(["publisher.extension"])
+
+        self.assertEqual(cm.exception.code, 1)
+        mock_remove.assert_not_called()  # Cleanup shouldn't happen if installation fails
