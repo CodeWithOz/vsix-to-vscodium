@@ -1,11 +1,11 @@
-# vsix-to-codium
+# vsix-to-vscodium
 
-A tool to download and install VS Code extensions in Codium-based IDEs.
+A tool to download and install VS Code extensions in VSCodium-based IDEs.
 
 ## Installation
 
 ```bash
-pip install vsix-to-codium
+pip install vsix-to-vscodium
 ```
 
 ## Usage
@@ -14,32 +14,32 @@ pip install vsix-to-codium
 
 ```bash
 # Basic usage (defaults to windsurf)
-vsix-to-codium publisher.extension-name
+vsix-to-vscodium publisher.extension-name
 
 # Specify a different IDE
-vsix-to-codium --ide cursor publisher.extension-name
+vsix-to-vscodium --ide cursor publisher.extension-name
 
 # Example: Install Python extension in Cursor
-vsix-to-codium --ide cursor ms-python.python
+vsix-to-vscodium --ide cursor ms-python.python
 ```
 
 ### Transfer all VS Code extensions
 
-If you're switching from VS Code to a Codium-based IDE, you can transfer all your installed extensions at once:
+If you're switching from VS Code to a VSCodium-based IDE, you can transfer all your installed extensions at once:
 
 ```bash
 # Transfer all extensions (defaults to windsurf)
-vsix-to-codium --transfer-all
+vsix-to-vscodium --transfer-all
 
 # Transfer all extensions to a specific IDE
-vsix-to-codium --transfer-all --ide cursor
+vsix-to-vscodium --transfer-all --ide cursor
 ```
 
 ## Features
 
 - Downloads extensions from VS Code Marketplace
-- Automatically installs extensions in Codium-based IDEs
-- Supports multiple Codium-based IDEs (e.g., Windsurf, Cursor)
+- Automatically installs extensions in VSCodium-based IDEs
+- Supports multiple VSCodium-based IDEs (e.g., Windsurf, Cursor)
 - Bulk transfer of all installed VS Code extensions
 - Supports specific version installation
 - Caches downloaded extensions to avoid redundant downloads
@@ -51,8 +51,8 @@ To set up the development environment:
 
 ```bash
 # Clone the repository
-git clone https://github.com/CodeWithOz/vsix-to-codium.git
-cd vsix-to-codium
+git clone https://github.com/CodeWithOz/vsix-to-vscodium.git
+cd vsix-to-vscodium
 
 # Create and activate a virtual environment
 python -m venv .venv

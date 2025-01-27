@@ -1,4 +1,4 @@
-"""Command-line interface for vsix-to-codium."""
+"""Command-line interface for vsix-to-vscodium."""
 
 import sys
 import subprocess
@@ -35,7 +35,9 @@ def get_vscode_extensions() -> List[str]:
         raise
 
 
-def download_extension(extension_id: str, specific_version: Optional[str] = None, no_cache: bool = False) -> str:
+def download_extension(
+    extension_id: str, specific_version: Optional[str] = None, no_cache: bool = False
+) -> str:
     """
     Download a VS Code extension from the marketplace.
 
@@ -66,7 +68,7 @@ def download_extension(extension_id: str, specific_version: Optional[str] = None
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json;api-version=3.0-preview.1",
-        "User-Agent": "VSCode Extension Manager/1.0",
+        "User-Agent": "VSCodium Extension Manager/1.0",
     }
 
     print(f"Querying Marketplace API for {extension_id}...")
@@ -78,7 +80,9 @@ def download_extension(extension_id: str, specific_version: Optional[str] = None
         if specific_version:
             version = specific_version
         else:
-            version = extension_data["results"][0]["extensions"][0]["versions"][0]["version"]
+            version = extension_data["results"][0]["extensions"][0]["versions"][0][
+                "version"
+            ]
     except (KeyError, IndexError) as e:
         print(f"Failed to get extension metadata: {e}")
         sys.exit(1)
@@ -141,12 +145,12 @@ def main(args: Optional[list[str]] = None) -> None:
         args: Command line arguments (defaults to sys.argv[1:])
     """
     parser = argparse.ArgumentParser(
-        description="Download and install VS Code extensions in Codium-based IDEs"
+        description="Download and install VS Code extensions in VSCodium-based IDEs"
     )
     parser.add_argument(
         "--ide",
-        default="windsurf",
-        help="Name of the Codium-based IDE executable (default: windsurf)",
+        default="codium",
+        help="Name of the VSCodium-based IDE executable (default: codium)",
     )
     parser.add_argument(
         "--transfer-all",

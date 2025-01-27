@@ -3,3 +3,4 @@
 __pycache__/
 extensions/
 .coverage
+dist/
