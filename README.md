@@ -45,6 +45,12 @@ vsix-to-vscodium --transfer-all --ide cursor
 - Caches downloaded extensions to avoid redundant downloads
 - Cleans up downloaded files after installation
 
+## Caveats
+
+- When searching for installed extensions in the Extensions view, you must prepend `@enabled` to your search term to see extensions installed via this tool:
+
+  ![Extensions search showing @enabled requirement](https://github.com/CodeWithOz/vsix-to-vscodium/raw/main/docs/images/enabled-search.png)
+
 ## Development
 
 To set up the development environment:
