@@ -51,6 +51,17 @@ vsix-to-vscodium --transfer-all --ide cursor
 
   ![Extensions search showing @enabled requirement](https://github.com/CodeWithOz/vsix-to-vscodium/raw/main/docs/images/enabled-search.png)
 
+## Next Steps/Improvements
+
+- Always remove downloaded files, even if installation fails
+- Show failed installs in final message when installation is complete, especially when installing multiple extensions
+- Allow updates of extensions that have newer versions of what's installed
+- Allow selecting extensions for install instead of just installing everything in VS Code
+  - Some extensions actually don't make sense to copy, e.g., GitHub Copilot when running Cursor or Windsurf
+- Don't install disabled extensions
+  - Perhaps add a flag that allows user to specify that disabled extensions should also be installed
+- Use open-vsx extensions directly when extensions are already available there
+
 ## Development
 
 To set up the development environment:
