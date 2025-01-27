@@ -17,10 +17,10 @@ pip install vsix-to-vscodium
 vsix-to-vscodium publisher.extension-name
 
 # Specify a different IDE
-vsix-to-vscodium --ide cursor publisher.extension-name
+vsix-to-vscodium --ide windsurf publisher.extension-name
 
-# Example: Install Python extension in Cursor
-vsix-to-vscodium --ide cursor ms-python.python
+# Example: Install Python extension in Windsurf
+vsix-to-vscodium --ide windsurf ms-python.python
 ```
 
 ### Transfer all VS Code extensions
@@ -32,7 +32,7 @@ If you're switching from VS Code to a VSCodium-based IDE, you can transfer all y
 vsix-to-vscodium --transfer-all
 
 # Transfer all extensions to a specific IDE
-vsix-to-vscodium --transfer-all --ide cursor
+vsix-to-vscodium --transfer-all --ide windsurf
 ```
 
 ## Features
@@ -57,7 +57,7 @@ vsix-to-vscodium --transfer-all --ide cursor
 - Show failed installs in final message when installation is complete, especially when installing multiple extensions
 - Allow updates of extensions that have newer versions of what's installed
 - Allow selecting extensions for install instead of just installing everything in VS Code
-  - Some extensions actually don't make sense to copy, e.g., GitHub Copilot when running Cursor or Windsurf
+  - Some extensions actually don't make sense to copy, e.g., GitHub Copilot when running Windsurf
 - Don't install disabled extensions
   - Perhaps add a flag that allows user to specify that disabled extensions should also be installed
 - Use open-vsx extensions directly when extensions are already available there

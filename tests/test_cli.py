@@ -230,13 +230,13 @@ class TestExtensionManager(unittest.TestCase):
     def test_main_transfer_all_custom_ide(
         self, mock_install, mock_download, mock_get_extensions
     ):
-        """Test transfer all with custom IDE."""
+        """Test transferring all extensions to a custom IDE."""
         mock_get_extensions.return_value = ["pub1.ext1"]
         mock_download.return_value = "./extensions/pub1.ext1.vsix"
 
-        main(["--transfer-all", "--ide", "cursor"])
+        main(["--transfer-all", "--ide", "windsurf"])
 
-        mock_install.assert_called_once_with("./extensions/pub1.ext1.vsix", "cursor")
+        mock_install.assert_called_once_with("./extensions/pub1.ext1.vsix", "windsurf")
 
     @patch("vsix_to_vscodium.cli.get_vscode_extensions")
     @patch("vsix_to_vscodium.cli.download_extension")
@@ -263,10 +263,10 @@ class TestExtensionManager(unittest.TestCase):
         ) as mock_install:
             mock_download.return_value = "./extensions/test.vsix"
 
-            main(["--ide", "cursor", "publisher.extension"])
+            main(["--ide", "windsurf", "publisher.extension"])
 
             mock_download.assert_called_once_with("publisher.extension")
-            mock_install.assert_called_once_with("./extensions/test.vsix", "cursor")
+            mock_install.assert_called_once_with("./extensions/test.vsix", "windsurf")
 
     def test_main_no_args_shows_help(self):
         """Test that running without args shows help."""
