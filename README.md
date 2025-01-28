@@ -2,6 +2,12 @@
 
 A tool to download and install VS Code extensions in VSCodium-based IDEs.
 
+## Why does this package exist?
+
+This package was born out of the creator's experience trying out the [Windsurf IDE](https://codeium.com/windsurf). After discovering that many important extensions were missing, he learned that Windsurf, like other VSCodium-based IDEs, uses a different extensions marketplace due to [Microsoft's licensing restrictions](https://github.com/VSCodium/vscodium/blob/master/docs/index.md#extensions-marketplace).
+
+Rather than manually downloading and installing each extension, he decided to try out Windsurf's AI features by building a package that could copy over VS Code extensions with a single command. That package is `vsix-to-vscodium`.
+
 ## Installation
 
 ```bash
@@ -39,7 +45,7 @@ vsix-to-vscodium --transfer-all --ide windsurf
 
 - Downloads extensions from VS Code Marketplace
 - Automatically installs extensions in VSCodium-based IDEs
-- Supports multiple VSCodium-based IDEs (e.g., Windsurf, Cursor)
+- Supports multiple VSCodium-based IDEs (e.g., Windsurf)
 - Bulk transfer of all installed VS Code extensions
 - Supports specific version installation
 - Caches downloaded extensions to avoid redundant downloads

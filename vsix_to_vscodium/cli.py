@@ -120,7 +120,7 @@ def install_extension(vsix_path: str, ide_name: str) -> None:
 
     Args:
         vsix_path: Path to the .vsix file
-        ide_name: Name of the IDE executable (e.g., 'windsurf', 'cursor')
+        ide_name: Name of the IDE executable (e.g., 'windsurf')
 
     Raises:
         subprocess.CalledProcessError: If installation fails
