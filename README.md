@@ -59,7 +59,6 @@ vsix-to-vscodium --transfer-all --ide windsurf
 
 ## Next Steps/Improvements
 
-- Always remove downloaded files, even if installation fails
 - Show failed installs in final message when installation is complete, especially when installing multiple extensions
 - Allow updates of extensions that have newer versions of what's installed
 - Allow selecting extensions for install instead of just installing everything in VS Code
