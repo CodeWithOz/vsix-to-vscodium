@@ -125,16 +125,17 @@ def install_extension(vsix_path: str, ide_name: str) -> None:
     Raises:
         subprocess.CalledProcessError: If installation fails
     """
-    print(f"Installing extension using {ide_name}...")
-    subprocess.run([ide_name, "--install-extension", vsix_path], check=True)
-    print("Extension installed successfully!")
-
-    # Clean up the .vsix file
     try:
-        os.remove(vsix_path)
-        print(f"Cleaned up {vsix_path}")
-    except OSError as e:
-        print(f"Warning: Could not remove {vsix_path}: {e}")
+        print(f"Installing extension using {ide_name}...")
+        subprocess.run([ide_name, "--install-extension", vsix_path], check=True)
+        print("Extension installed successfully!")
+    finally:
+        # Clean up the .vsix file regardless of installation success
+        try:
+            os.remove(vsix_path)
+            print(f"Cleaned up {vsix_path}")
+        except OSError as e:
+            print(f"Warning: Could not remove {vsix_path}: {e}")
 
 
 def main(args: Optional[list[str]] = None) -> None:

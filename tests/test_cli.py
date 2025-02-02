@@ -197,7 +197,8 @@ class TestExtensionManager(unittest.TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 install_extension(vsix_path, ide_name)
 
-            mock_remove.assert_not_called()  # Cleanup shouldn't happen if installation fails
+            # Verify cleanup happens even when installation fails
+            mock_remove.assert_called_once_with(vsix_path)
 
     @patch("vsix_to_vscodium.cli.get_vscode_extensions")
     @patch("vsix_to_vscodium.cli.download_extension")
@@ -332,4 +333,5 @@ class TestExtensionManager(unittest.TestCase):
             main(["publisher.extension"])
 
         self.assertEqual(cm.exception.code, 1)
-        mock_remove.assert_not_called()  # Cleanup shouldn't happen if installation fails
+        # Verify cleanup happens even when installation fails
+        mock_remove.assert_called_once_with(vsix_path)
