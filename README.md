@@ -19,7 +19,7 @@ pip install vsix-to-vscodium
 ### Install a single extension
 
 ```bash
-# Basic usage (defaults to windsurf)
+# Basic usage (defaults to VSCodium)
 vsix-to-vscodium publisher.extension-name
 
 # Specify a different IDE
@@ -34,7 +34,7 @@ vsix-to-vscodium --ide windsurf ms-python.python
 If you're switching from VS Code to a VSCodium-based IDE, you can transfer all your installed extensions at once:
 
 ```bash
-# Transfer all extensions (defaults to windsurf)
+# Transfer all extensions (defaults to VSCodium)
 vsix-to-vscodium --transfer-all
 
 # Transfer all extensions to a specific IDE
